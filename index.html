@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chemistry Challenge</title>
+<style>
+:root{--bg:#101827;--panel:#1c2940;--accent:#62d6c8;--text:#f4f7fb;--muted:#aab8cc}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:22px;background:linear-gradient(135deg,#101827,#172b3c);font-family:Arial,sans-serif;color:var(--text);display:grid;place-items:center}
+main{width:min(760px,100%)}.panel{background:var(--panel);border:1px solid #31445f;border-radius:20px;padding:clamp(20px,5vw,38px);box-shadow:0 12px 35px #0004}
+header{text-align:center;margin-bottom:22px}header .emoji{font-size:48px}h1{font-size:clamp(30px,6vw,46px);margin:10px 0;color:white}h2{color:var(--accent);margin-top:0}.muted{color:var(--muted);line-height:1.6}
+button{border:0;border-radius:12px;padding:14px 20px;font-size:17px;font-weight:bold;cursor:pointer;background:var(--accent);color:#10232b;margin:7px 4px}
+button.secondary{background:#31445f;color:white}.choice{display:block;width:100%;text-align:left;background:#2a3b54;color:white;margin:10px 0}.choice.correct{background:#187a62}.choice.wrong{background:#9c3d50}.choice:disabled{cursor:default;opacity:1}
+.status{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;color:var(--muted);margin-bottom:16px}.question{background:#111d2d;border:1px solid #354960;border-radius:14px;padding:20px;margin:15px 0}.hidden{display:none}#feedback{min-height:28px;font-weight:bold}.center{text-align:center}
+@media(max-width:500px){body{padding:12px}.panel{padding:20px}.choice{text-align:left}}
+</style>
+</head>
+<body>
+<main>
+<section class="panel center" id="home">
+<header><div class="emoji">🧪</div><h1>Chemistry Challenge</h1><p class="muted">Test your chemistry knowledge!</p></header>
+<p class="muted">There are 6 multiple-choice questions. Choose the best answer and see your score at the end.</p>
+<button onclick="startGame()">▶ Start Game</button>
+</section>
+<section class="panel hidden" id="game">
+<div class="status"><span id="progress">Question 1 of 6</span><span>Score: <b id="score">0</b></span></div>
+<div class="question"><h2 id="questionText"></h2><div id="choices"></div><p id="feedback" aria-live="polite"></p></div>
+<button id="next" onclick="nextQuestion()" disabled>Next Question →</button>
+</section>
+<section class="panel center hidden" id="results">
+<div class="emoji">🏁</div><h1>Game Over!</h1><h2 id="finalScore"></h2>
+<p class="muted" id="message"></p>
+<button onclick="startGame()">Play Again</button>
+</section>
+</main>
+<script>
+const questions = [{"question": "What gas do humans need to breathe to survive?", "answers": ["Nitrogen", "Oxygen", "Carbon dioxide", "Hydrogen"], "correct": 1}, {"question": "What percentage of regular air is oxygen?", "answers": ["10%", "50%", "21%", "79%"], "correct": 2}, {"question": "What is the main purpose of oxygen in the human body?", "answers": ["To produce energy", "To make bones", "To change eye color", "To produce sunlight"], "correct": 0}, {"question": "What are the products of cellular respiration?", "answers": ["Oxygen and glucose", "Carbon dioxide and water", "Nitrogen and hydrogen", "Salt and water"], "correct": 1}, {"question": "What is one possible risk of too much oxygen during diving?", "answers": ["Oxygen toxicity", "Better eyesight", "Faster swimming", "Stronger muscles"], "correct": 0}, {"question": "What type of process is cellular respiration?", "answers": ["Decomposition", "Double displacement", "Exothermic process", "Physical change"], "correct": 2}];
+let current=0, score=0, answered=false;
+function show(id){["home","game","results"].forEach(x=>document.getElementById(x).classList.toggle("hidden",x!==id))}
+function startGame(){current=0;score=0;show("game");renderQuestion()}
+function renderQuestion(){
+ answered=false;const q=questions[current];
+ document.getElementById("progress").textContent=`Question ${current+1} of ${questions.length}`;
+ document.getElementById("score").textContent=score;
+ document.getElementById("questionText").textContent=q.question;
+ document.getElementById("feedback").textContent="";
+ const next=document.getElementById("next");next.disabled=true;next.textContent=current===questions.length-1?"See Results":"Next Question →";
+ const box=document.getElementById("choices");box.innerHTML="";
+ q.answers.forEach((answer,i)=>{const b=document.createElement("button");b.className="choice";b.textContent="ABCD"[i]+". "+answer;b.onclick=()=>selectAnswer(i,b);box.appendChild(b)});
+}
+function selectAnswer(i,button){
+ if(answered)return;answered=true;const q=questions[current],buttons=[...document.querySelectorAll(".choice")];
+ buttons.forEach((b,j)=>{b.disabled=true;if(j===q.correct)b.classList.add("correct")});
+ if(i===q.correct){score++;document.getElementById("feedback").textContent="✓ Correct answer!";}
+ else{button.classList.add("wrong");document.getElementById("feedback").textContent="✗ Incorrect. The correct answer is highlighted in green."}
+ document.getElementById("score").textContent=score;document.getElementById("next").disabled=false;
+}
+function nextQuestion(){
+ if(!answered)return;
+ if(current<questions.length-1){current++;renderQuestion();return}
+ show("results");document.getElementById("finalScore").textContent=`Your score: ${score} out of ${questions.length}`;
+ document.getElementById("message").textContent=score===questions.length?"Perfect score! Excellent work!":score>=4?"Great job!":"Good effort! Keep practicing!";
+}
+</script>
+</body></html>
